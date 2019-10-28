@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 from PublicLib.ACModule.simEnergy import energy
 from PublicLib.ACModule.simCurrent import ACsampling
+from PublicLib.Protocol import dl645resp as dl645
 
 
 def creataddr(i):
@@ -59,6 +60,21 @@ if __name__ == '__main__':
     mtr.run(3600)
     ac1 = mtr.readins(1)
     print(ac1.I)
+
+    frame = 'FE FE FE FE 68 02 00 00 00 50 48 68 11 04 33 32 35 33 4c 16'
+    ret, dt = dl645.dl645_dealframe(frame)
+    print(ret, dt)
+
+    if ret:
+        index = mtr.readindex(dt['addr'])
+        dt['index'] = index
+
+        eng = mtr.readenergy(index)
+        print(eng)
+        dl645.dl645_read(dt, eng)
+
+        fe = dl645.dl645_makeframe(dt)
+        print(fe)
 
 
 
