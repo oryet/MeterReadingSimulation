@@ -43,8 +43,15 @@ class meter485():
 
     def readindex(self, addr):
         for i in range(self.num):
-            if addr == self.meter485list[i]['addr']:
-                return i
+            laddr = self.meter485list[i]['addr']
+            for j in range (0, 12, 2):
+                if addr[j:j+2] == laddr[j:j + 2] or addr[j:j+2] == 'AA':
+                    continue
+                else:
+                    break
+            if j >= 10:
+                if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
+                    return i
         return -1
 
 

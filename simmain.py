@@ -41,16 +41,18 @@ if __name__ == '__main__':
 
     # 创建 模拟表串口
     ss = simSerial()
-    ret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
-    while ret:
-        str = ss.DReadPort()  # 读串口数据
+    openret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
+    while openret:
+        str = ss.DReadPort()    # 读串口数据
         ret, dt = resp.dl645_dealframe(str)
         if ret:
             index = mtr.readindex(dt['addr'])
-            dt['index'] = index
+            if index >= 0:      # 表地址存在
+                dt['index'] = index
+                dt['addr'] = mtr.readaddr(index)
 
-            eng = mtr.readenergy(index)
-            resp.dl645_read(dt, eng)
+                eng = mtr.readenergy(index)
+                resp.dl645_read(dt, eng)
 
-            fe = resp.dl645_makeframe(dt)
-            ss.onSendData(ser, fe, 'hex')
+                fe = resp.dl645_makeframe(dt)
+                ss.onSendData(ser, fe, 'hex')
