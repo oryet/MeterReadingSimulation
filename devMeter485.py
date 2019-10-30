@@ -22,9 +22,12 @@ class meter485():
             ac.run()
             eng.run(ac, t)
 
-    def addmeter(self, addnum):
+    def num(self):
+        return self.num
+
+    def addmeter(self, addnum, phaseNum=1):  # 485表默认单相表
         for i in range(addnum):
-            eng = energy()
+            eng = energy(phaseNum)
             ac = ACsampling()
             addr = creataddr(self.num+i)
             self.meter485list += [{'energy':eng, 'ac':ac, 'addr':addr}]
@@ -78,7 +81,7 @@ if __name__ == '__main__':
 
         eng = mtr.readenergy(index)
         print(eng)
-        dl645.dl645_read(dt, eng)
+        dl645.dl645_read(dt, eng.energy)
 
         fe = dl645.dl645_makeframe(dt)
         print(fe)
