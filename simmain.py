@@ -32,7 +32,9 @@ def meterread(mtr, dt):
         dt['addr'] = mtr.readaddr(index)
 
         eng = mtr.readenergy(index)
-        resp.dl645_read(dt, eng.energy)
+        ins = mtr.readins(index)
+        phaseNum = mtr.getphaseNum(index)
+        resp.dl645_read(dt, eng.energy, ins.ac, phaseNum)
 
         fe = resp.dl645_makeframe(dt)
         return fe
@@ -77,10 +79,12 @@ if __name__ == '__main__':
     ss = simSerial()
     openret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
     while openret:
+        dt = {}
         str = ss.DReadPort()  # 读串口数据
         ret, dt = resp.dl645_dealframe(str)
         if ret:
                 # 485表尝试解析
+                fe = None
                 fe = meterread(mtr, dt)
                 if fe != None:
                     ss.onSendData(ser, fe, 'hex')

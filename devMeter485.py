@@ -30,7 +30,9 @@ class meter485():
             eng = energy(phaseNum)
             ac = ACsampling()
             addr = creataddr(self.num+i)
-            self.meter485list += [{'energy':eng, 'ac':ac, 'addr':addr}]
+            if phaseNum != 1 and phaseNum != 3:
+                phaseNum = 1
+            self.meter485list += [{'energy':eng, 'ac':ac, 'addr':addr, 'phaseNum':phaseNum}]
         self.num += addnum
 
     def readins(self,i):
@@ -56,6 +58,9 @@ class meter485():
                 if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
                     return i
         return -1
+
+    def getphaseNum(self, i):
+        return self.meter485list[i]['phaseNum']
 
 
 if __name__ == '__main__':
