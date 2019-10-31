@@ -29,8 +29,8 @@ class dev2315():
         acA = np.zeros([5,4], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseA']:
             if i < mtr.num:
-                acsmp = mtr.readins(i)
-                acp = np.asarray(acsmp.ac)
+                ins = mtr.readins(i)
+                acp = np.asarray(ins)
                 acA[1:2] += acp[1:2]  # I
                 acA[3:5] += acp[3:5]  # P/Q
                 acA[0:1] = acp[0:1]   # U
@@ -40,8 +40,8 @@ class dev2315():
         acB = np.zeros([5, 4], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseB']:
             if i < mtr.num:
-                acsmp = mtr.readins(i)
-                acp = np.asarray(acsmp.ac)
+                ins = mtr.readins(i)
+                acp = np.asarray(ins)
                 acB[1:2] += acp[1:2]  # I
                 acB[3:5] += acp[3:5]  # P/Q
                 acB[0:1] = acp[0:1]   # U
@@ -51,8 +51,8 @@ class dev2315():
         acC = np.zeros([5, 4], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseC']:
             if i < mtr.num:
-                acsmp = mtr.readins(i)
-                acp = np.asarray(acsmp.ac)
+                ins = mtr.readins(i)
+                acp = np.asarray(ins)
                 acC[1:2] += acp[1:2]  # I
                 acC[3:5] += acp[3:5]  # P/Q
                 acC[0:1] = acp[0:1]   # U
