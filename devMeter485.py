@@ -36,11 +36,11 @@ class meter485():
         self.num += addnum
 
     def readins(self,i):
-        ac = self.meter485list[i]['ac']
+        ac = self.meter485list[i]['ac'].ac
         return ac
 
     def readenergy(self,i):
-        eng = self.meter485list[i]['energy']
+        eng = self.meter485list[i]['energy'].energy
         return eng
 
     def readaddr(self,i):
@@ -70,11 +70,11 @@ if __name__ == '__main__':
     index = mtr.readindex(addr)
     print(addr, index)
     mtr.run(3600)
-    ac1 = mtr.readins(1)
-    print(ac1.I)
+    ins = mtr.readins(1)
+    print(ins[0])
     mtr.run(3600)
-    ac1 = mtr.readins(1)
-    print(ac1.I)
+    ins = mtr.readins(1)
+    print(ins[0])
 
     frame = 'FE FE FE FE 68 02 00 00 00 50 48 68 11 04 33 32 35 33 4c 16'
     ret, dt = dl645.dl645_dealframe(frame)
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
         eng = mtr.readenergy(index)
         print(eng)
-        dl645.dl645_read(dt, eng.energy)
+        dl645.dl645_read(dt, eng, mtr.getphaseNum(index))
 
         fe = dl645.dl645_makeframe(dt)
         print(fe)

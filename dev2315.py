@@ -90,21 +90,21 @@ class dev2315():
         for i in self.rel['tly2315'][index]['meterPhaseA']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
-                dataA += np.asarray(eng.energy)
+                dataA += np.asarray(eng)
 
         # B相
         dataB = np.zeros([4, 6, 9], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseB']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
-                dataB += np.asarray(eng.energy)
+                dataB += np.asarray(eng)
 
         # C相
         dataC = np.zeros([4, 6, 9], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseC']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
-                dataC += np.asarray(eng.energy)
+                dataC += np.asarray(eng)
 
         dataTotal[1:2] = dataA[0:1]
         dataTotal[2:3] = dataB[0:1]

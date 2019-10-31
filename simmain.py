@@ -34,7 +34,7 @@ def meterread(mtr, dt):
         eng = mtr.readenergy(index)
         ins = mtr.readins(index)
         phaseNum = mtr.getphaseNum(index)
-        resp.dl645_read(dt, eng.energy, ins.ac, phaseNum)
+        resp.dl645_read(dt, eng, ins, phaseNum)
 
         fe = resp.dl645_makeframe(dt)
         return fe
@@ -42,12 +42,13 @@ def meterread(mtr, dt):
 
 def colread(mmtr, mtr, dt):
     index = mmtr.readindex(dt['addr'])
-    if index >= 0:  # 485表地址存在
+    if index >= 0:  # col地址存在
         dt['index'] = index
         dt['addr'] = mmtr.readaddr(index)
 
-        energy = mmtr.readenergy(mtr, index)
-        resp.dl645_read(dt, energy)
+        eng = mmtr.readenergy(mtr, index)
+        ins = mmtr.readins(mtr, index)
+        resp.dl645_read(dt, eng, ins, 3)  # col直接取数据结构
 
         fe = resp.dl645_makeframe(dt)
         return fe
