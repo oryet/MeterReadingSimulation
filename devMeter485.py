@@ -17,10 +17,10 @@ class meter485():
 
     def run(self, t):
         for i in range(self.num):
-            ac = self.meter485list[i]['ac']
+            ins = self.meter485list[i]['ac']
             eng = self.meter485list[i]['energy']
-            ac.run()
-            eng.run(ac, t)
+            ins.run()
+            eng.run(ins.ac, t)
 
     def num(self):
         return self.num
