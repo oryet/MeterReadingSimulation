@@ -66,6 +66,7 @@ if __name__ == '__main__':
         {'addr': '231500000003', 'meterPhaseA': [3], 'meterPhaseB': [7], 'meterPhaseC': [0]}
     ]}
 
+    freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
     # 创建485表
     mtr = dm.meter485()
     mtr.addmeter(cfg['meterNum'])
