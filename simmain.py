@@ -11,19 +11,68 @@ import sys
 sys.path.append('../')
 import threading
 import time
+import datetime
 from PublicLib.SerialModule.simSerial import simSerial
 from MeterReadingSimulation import devMeter485 as dm
 import PublicLib.Protocol.dl645resp as resp
 from MeterReadingSimulation import dev2315 as dc
 
 
+
+
+def timerun():
+    mon = datetime.datetime.now().month
+    day = datetime.datetime.now().day
+    hour = datetime.datetime.now().time().hour
+    return mon, day, hour
+
+
+def timerunmagn(magn):
+    global dwtime
+    dwtime += magn
+    dt_obj = datetime.datetime.fromtimestamp(dwtime)
+    time_tuple = dt_obj.timetuple()
+    return time_tuple[1], time_tuple[2], time_tuple[3]
+
+
+def formatdatetime(dt, mon, day, hour):
+    dflag = {'M': 0, 'D': 0, 'H': 0}
+
+    if hour != dt['hour']:
+        dflag['H'] = 1
+        dt['hour'] = hour
+    if day != dt['day']:
+        dflag['D'] = 1
+        dt['day'] = day
+    if mon != dt['month']:
+        dflag['M'] = 1
+        dt['month'] = mon
+    return dflag
+
+
 def meterrun(mtr, timeouts, magnification=1):
+    dt = {'month': 0, 'day': 0, 'hour': 0}
+    global dwtime
+    dwtime = int(time.time())
+
     while 1:
         time.sleep(timeouts)
-        if magnification > 0:
+        if magnification > 1:  # 虚拟倍数走字
             mtr.run(timeouts * magnification)
-        else:
+            mon, day, hour = timerunmagn(timeouts * magnification)
+        else:  # 根据当前时间自然走字
             mtr.run(timeouts)
+            mon, day, hour = timerun()
+
+        dflag = formatdatetime(dt, mon, day, hour)
+
+        if dflag['M']:
+            mtr.freezeHisData('month')
+        if dflag['D']:
+            mtr.freezeHisData('day')
+        if dflag['H']:
+            mtr.freezeHisData('hour')
+
 
 def meterread(mtr, dt):
     index = mtr.readindex(dt['addr'])
@@ -40,6 +89,7 @@ def meterread(mtr, dt):
         return fe
     return None
 
+
 def colread(mmtr, mtr, dt):
     index = mmtr.readindex(dt['addr'])
     if index >= 0:  # col地址存在
@@ -55,13 +105,14 @@ def colread(mmtr, mtr, dt):
 
 
 if __name__ == '__main__':
+    dwtime = 0
 
-    cfg = {'port': 'COM15', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1,
-           'meterNum': 10, 'looptimes': 10, 'Magnification': 100}
+    cfg = {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1,
+           'meterNum': 10, 'looptimes': 10, 'Magnification': 100}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
 
     relation = {'tly2315': [
-        {'addr': '231500000123', 'meterPhaseA': [1,2,3], 'meterPhaseB': [4,5,6,7], 'meterPhaseC': [8,9,0]},
-        {'addr': '231500000001', 'meterPhaseA': [1], 'meterPhaseB': [4,5], 'meterPhaseC': [8]},
+        {'addr': '231500000123', 'meterPhaseA': [1, 2, 3], 'meterPhaseB': [4, 5, 6, 7], 'meterPhaseC': [8, 9, 0]},
+        {'addr': '231500000001', 'meterPhaseA': [1], 'meterPhaseB': [4, 5], 'meterPhaseC': [8]},
         {'addr': '231500000002', 'meterPhaseA': [2], 'meterPhaseB': [6], 'meterPhaseC': [9]},
         {'addr': '231500000003', 'meterPhaseA': [3], 'meterPhaseB': [7], 'meterPhaseC': [0]}
     ]}
@@ -80,21 +131,24 @@ if __name__ == '__main__':
     # 485表 走字
     threading.Thread(target=meterrun, args=(mtr, cfg['looptimes'], cfg['Magnification'])).start()
 
-
     # 创建 模拟表串口
     ss = simSerial()
     openret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
     while openret:
+        dt_obj = datetime.datetime.fromtimestamp(dwtime)
+        date_str = dt_obj.strftime("%Y-%m-%d %H:%M:%S")
+        print("date_str:", date_str)
+
         dt = {}
         str = ss.DReadPort()  # 读串口数据
         ret, dt = resp.dl645_dealframe(str)
         if ret:
-                # 485表尝试解析
-                fe = None
-                fe = meterread(mtr, dt)
+            # 485表尝试解析
+            fe = None
+            fe = meterread(mtr, dt)
+            if fe != None:
+                ss.onSendData(ser, fe, 'hex')
+            else:  # 2315尝试解析
+                fe = colread(mmtr, mtr, dt)
                 if fe != None:
                     ss.onSendData(ser, fe, 'hex')
-                else: # 2315尝试解析
-                    fe = colread(mmtr, mtr, dt)
-                    if fe != None:
-                        ss.onSendData(ser, fe, 'hex')
