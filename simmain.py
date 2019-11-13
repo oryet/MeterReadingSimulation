@@ -70,11 +70,15 @@ if __name__ == '__main__':
     mtr = dm.meter485()
     mtr.addmeter(cfg['meterNum'])
 
+    # 创建485表 历史数据
+    mtr.createFreezeHisData(freezedatacfg)
+
     # 创建2315
     mmtr = dc.dev2315(relation)
 
     # 485表 走字
     threading.Thread(target=meterrun, args=(mtr, cfg['looptimes'], cfg['Magnification'])).start()
+
 
     # 创建 模拟表串口
     ss = simSerial()

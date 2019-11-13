@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 from PublicLib.ACModule.simEnergy import energy
 from PublicLib.ACModule.simCurrent import ACsampling
+from PublicLib.ACModule.simMeterFreeze import freeze
 from PublicLib.Protocol import dl645resp as dl645
 
 
@@ -25,14 +26,16 @@ class meter485():
     def num(self):
         return self.num
 
-    def addmeter(self, addnum, phaseNum=1):  # 485表默认单相表
+    def addmeter(self, addnum, phaseNum=1, cfg=None):  # 485表默认单相表
         for i in range(addnum):
             eng = energy(phaseNum)
             ac = ACsampling()
+            fz = freeze(cfg)
             addr = creataddr(self.num+i)
             if phaseNum != 1 and phaseNum != 3:
                 phaseNum = 1
-            self.meter485list += [{'energy':eng, 'ac':ac, 'addr':addr, 'phaseNum':phaseNum}]
+            self.meter485list += [{'energy':eng, 'ac':ac, 'addr':addr, 'phaseNum':phaseNum,
+                                    'freeze': fz}]
         self.num += addnum
 
     def readins(self,i):
@@ -61,6 +64,53 @@ class meter485():
 
     def getphaseNum(self, i):
         return self.meter485list[i]['phaseNum']
+
+    def freezeformat(self, cfg):
+        mon = cfg['month']
+        day = cfg['day']
+        hour = cfg['hour']
+
+        daym = int(day / 30)
+        hourd = int(hour / 24)
+
+        if mon >= daym:
+            mon = mon - daym
+        else:
+            mon = 0
+
+        if day >= hourd:
+            day = day - hourd
+        else:
+            day = 0
+        return mon, day, hour
+
+    def createFreezeHisData(self, cfg):
+        mon, day, hour = self.freezeformat(cfg)
+        # for n in range(self.num):
+        for i in range(mon):
+            self.run(3600 * 24 * 30)
+            for n in range(self.num):
+                fz = self.meter485list[n]['freeze']
+                eng = self.meter485list[n]['energy'].energy
+                fz.FreezeData('month', eng)
+
+        for i in range(day):
+            self.run(3600 * 24)
+            for n in range(self.num):
+                fz = self.meter485list[n]['freeze']
+                eng = self.meter485list[n]['energy'].energy
+                fz.FreezeData('day', eng)
+                if i % 30 == 29:
+                    fz.FreezeData('month', eng)
+
+        for i in range(hour):
+            self.run(3600)
+            for n in range(self.num):
+                fz = self.meter485list[n]['freeze']
+                eng = self.meter485list[n]['energy'].energy
+                fz.FreezeData('hour', eng)
+                if i % 24 == 23:
+                    fz.FreezeData('day', eng)
 
 
 if __name__ == '__main__':
