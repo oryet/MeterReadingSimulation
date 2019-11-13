@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
         eng = mtr.readenergy(index)
         print(eng)
-        dl645.dl645_read(dt, eng, mtr.getphaseNum(index))
+        dl645.dl645_read(dt, mtr, index)
 
         fe = dl645.dl645_makeframe(dt)
         print(fe)

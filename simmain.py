@@ -62,10 +62,10 @@ def meterread(mtr, dt):
         dt['index'] = index
         dt['addr'] = mtr.readaddr(index)
 
-        eng = mtr.readenergy(index)
-        ins = mtr.readins(index)
-        phaseNum = mtr.getphaseNum(index)
-        resp.dl645_read(dt, eng, ins, phaseNum)
+        # eng = mtr.readenergy(index)
+        # ins = mtr.readins(index)
+        # phaseNum = mtr.getphaseNum(index)
+        resp.dl645_read(dt, mtr, index)
 
         fe = resp.dl645_makeframe(dt)
         return fe
@@ -78,9 +78,9 @@ def colread(mmtr, mtr, dt):
         dt['index'] = index
         dt['addr'] = mmtr.readaddr(index)
 
-        eng = mmtr.readenergy(mtr, index)
-        ins = mmtr.readins(mtr, index)
-        resp.dl645_read(dt, eng, ins, 3)  # col直接取数据结构
+        # eng = mmtr.readenergy(mtr, index)
+        # ins = mmtr.readins(mtr, index)
+        resp.dl645_read(dt, mtr, index, mmtr)  # col直接取数据结构
 
         fe = resp.dl645_makeframe(dt)
         return fe
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     # 创建485表
     mtr = dm.meter485()
-    mtr.addmeter(cfg['meterNum'])
+    mtr.addmeter(cfg['meterNum'], 3)
 
     # 创建485表 历史数据
     mtr.createFreezeHisData(freezedatacfg)

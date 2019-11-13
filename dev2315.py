@@ -132,6 +132,9 @@ class dev2315():
                     return i
         return -1
 
+    def getphaseNum(self, i):
+        return 3
+
 
 if __name__ == '__main__':
     mtr = meter485()
