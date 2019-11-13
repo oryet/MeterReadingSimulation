@@ -16,23 +16,7 @@ from PublicLib.SerialModule.simSerial import simSerial
 from MeterReadingSimulation import devMeter485 as dm
 import PublicLib.Protocol.dl645resp as resp
 from MeterReadingSimulation import dev2315 as dc
-
-
-
-
-def timerun():
-    mon = datetime.datetime.now().month
-    day = datetime.datetime.now().day
-    hour = datetime.datetime.now().time().hour
-    return mon, day, hour
-
-
-def timerunmagn(magn):
-    global dwtime
-    dwtime += magn
-    dt_obj = datetime.datetime.fromtimestamp(dwtime)
-    time_tuple = dt_obj.timetuple()
-    return time_tuple[1], time_tuple[2], time_tuple[3]
+from PublicLib.ACModule.simRTC import simrtc
 
 
 def formatdatetime(dt, mon, day, hour):
@@ -50,21 +34,19 @@ def formatdatetime(dt, mon, day, hour):
     return dflag
 
 
-def meterrun(mtr, timeouts, magnification=1):
+def meterrun(mtr, rtc, timeouts, magnification=1):
     dt = {'month': 0, 'day': 0, 'hour': 0}
-    global dwtime
-    dwtime = int(time.time())
 
     while 1:
         time.sleep(timeouts)
         if magnification > 1:  # 虚拟倍数走字
             mtr.run(timeouts * magnification)
-            mon, day, hour = timerunmagn(timeouts * magnification)
+            t = rtc.gettime(timeouts * magnification)
         else:  # 根据当前时间自然走字
             mtr.run(timeouts)
-            mon, day, hour = timerun()
+            t = rtc.gettime()
 
-        dflag = formatdatetime(dt, mon, day, hour)
+        dflag = formatdatetime(dt, t.month, t.day, t.hour)
 
         if dflag['M']:
             mtr.freezeHisData('month')
@@ -105,8 +87,6 @@ def colread(mmtr, mtr, dt):
 
 
 if __name__ == '__main__':
-    dwtime = 0
-
     cfg = {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1,
            'meterNum': 10, 'looptimes': 10, 'Magnification': 100}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
 
@@ -118,6 +98,10 @@ if __name__ == '__main__':
     ]}
 
     freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
+
+    # 创建时钟
+    rtc = simrtc()
+
     # 创建485表
     mtr = dm.meter485()
     mtr.addmeter(cfg['meterNum'])
@@ -129,16 +113,12 @@ if __name__ == '__main__':
     mmtr = dc.dev2315(relation)
 
     # 485表 走字
-    threading.Thread(target=meterrun, args=(mtr, cfg['looptimes'], cfg['Magnification'])).start()
+    threading.Thread(target=meterrun, args=(mtr, rtc, cfg['looptimes'], cfg['Magnification'])).start()
 
     # 创建 模拟表串口
     ss = simSerial()
     openret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
     while openret:
-        dt_obj = datetime.datetime.fromtimestamp(dwtime)
-        date_str = dt_obj.strftime("%Y-%m-%d %H:%M:%S")
-        print("date_str:", date_str)
-
         dt = {}
         str = ss.DReadPort()  # 读串口数据
         ret, dt = resp.dl645_dealframe(str)
