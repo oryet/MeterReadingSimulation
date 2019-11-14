@@ -120,13 +120,13 @@ class meter485():
             fz.FreezeData(type, eng)
 
     def readhismon(self, i, n):
-        return self.meter485list[i]['freeze'].mon[n]
+        return self.meter485list[i]['freeze'].mon[-n-1]
 
     def readhisday(self, i, n):
-        return self.meter485list[i]['freeze'].day[n]
+        return self.meter485list[i]['freeze'].day[-n-1]
 
     def readhishour(self, i, n):
-        return self.meter485list[i]['freeze'].hour[n]
+        return self.meter485list[i]['freeze'].hour[-n-1]
 
 
 if __name__ == '__main__':
