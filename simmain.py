@@ -41,11 +41,10 @@ def meterrun(mtr, rtc, timeouts, magnification=1):
         time.sleep(timeouts)
         if magnification > 1:  # 虚拟倍数走字
             mtr.run(timeouts * magnification)
-            t = rtc.gettime(timeouts * magnification)
         else:  # 根据当前时间自然走字
             mtr.run(timeouts)
-            t = rtc.gettime()
 
+        t = rtc.gettime()
         dflag = formatdatetime(dt, t.month, t.day, t.hour)
 
         if dflag['M']:
@@ -61,10 +60,6 @@ def meterread(mtr, dt):
     if index >= 0:  # 485表地址存在
         dt['index'] = index
         dt['addr'] = mtr.readaddr(index)
-
-        # eng = mtr.readenergy(index)
-        # ins = mtr.readins(index)
-        # phaseNum = mtr.getphaseNum(index)
         resp.dl645_read(dt, mtr, index)
 
         fe = resp.dl645_makeframe(dt)
@@ -100,7 +95,7 @@ if __name__ == '__main__':
     freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
 
     # 创建时钟
-    rtc = simrtc()
+    rtc = simrtc(cfg['Magnification'])
 
     # 创建485表
     mtr = dm.meter485()
@@ -125,6 +120,7 @@ if __name__ == '__main__':
         if ret:
             # 485表尝试解析
             fe = None
+            dt['ctime'] = rtc.gettick()
             fe = meterread(mtr, dt)
             if fe != None:
                 ss.onSendData(ser, fe, 'hex')
