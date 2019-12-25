@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+
 sys.path.append('../')
 from PublicLib.ACModule.simEnergy import energy
 from PublicLib.ACModule.simCurrent import ACsampling
@@ -12,6 +13,7 @@ relation = {'tly2315': [
     {'addr': '231500000002', 'meterPhaseA': [2], 'meterPhaseB': [6], 'meterPhaseC': [9]},
     {'addr': '231500000003', 'meterPhaseA': [3], 'meterPhaseB': [7], 'meterPhaseC': [0]}
 ]}
+
 
 class dev2315():
     def __init__(self, rel):
@@ -26,15 +28,15 @@ class dev2315():
         acTotal = np.zeros([5, 4], dtype=float)
 
         # A相
-        acA = np.zeros([5,4], dtype=float)
+        acA = np.zeros([5, 4], dtype=float)
         for i in self.rel['tly2315'][index]['meterPhaseA']:
             if i < mtr.num:
                 ins = mtr.readins(i)
                 acp = np.asarray(ins)
                 acA[1:2] += acp[1:2]  # I
                 acA[3:5] += acp[3:5]  # P/Q
-                acA[0:1] = acp[0:1]   # U
-                acA[2:3] = acp[2:3]   # A
+                acA[0:1] = acp[0:1]  # U
+                acA[2:3] = acp[2:3]  # A
 
         # B相
         acB = np.zeros([5, 4], dtype=float)
@@ -44,8 +46,8 @@ class dev2315():
                 acp = np.asarray(ins)
                 acB[1:2] += acp[1:2]  # I
                 acB[3:5] += acp[3:5]  # P/Q
-                acB[0:1] = acp[0:1]   # U
-                acB[2:3] = acp[2:3]   # A
+                acB[0:1] = acp[0:1]  # U
+                acB[2:3] = acp[2:3]  # A
 
         # C相
         acC = np.zeros([5, 4], dtype=float)
@@ -55,8 +57,8 @@ class dev2315():
                 acp = np.asarray(ins)
                 acC[1:2] += acp[1:2]  # I
                 acC[3:5] += acp[3:5]  # P/Q
-                acC[0:1] = acp[0:1]   # U
-                acC[2:3] = acp[2:3]   # A
+                acC[0:1] = acp[0:1]  # U
+                acC[2:3] = acp[2:3]  # A
 
         # U
         acTotal[0:1] = (acA[0:1] + acA[0:1] + acA[0:1]) / 3
@@ -113,7 +115,40 @@ class dev2315():
 
         return dataTotal
 
-    def readaddr(self,i):
+    def readdemand(self, mtr, index):
+        dataTotal = np.zeros([4, 6], dtype=float)
+        if index >= self.num:
+            return dataTotal
+
+        # A相
+        dataA = np.zeros([4, 6], dtype=float)
+        for i in self.rel['tly2315'][index]['meterPhaseA']:
+            if i < mtr.num:
+                eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
+                dataA += np.asarray(eng)
+
+        # B相
+        dataB = np.zeros([4, 6], dtype=float)
+        for i in self.rel['tly2315'][index]['meterPhaseB']:
+            if i < mtr.num:
+                eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
+                dataB += np.asarray(eng)
+
+        # C相
+        dataC = np.zeros([4, 6], dtype=float)
+        for i in self.rel['tly2315'][index]['meterPhaseC']:
+            if i < mtr.num:
+                eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
+                dataC += np.asarray(eng)
+
+        dataTotal[1:2] = dataA[0:1]
+        dataTotal[2:3] = dataB[0:1]
+        dataTotal[3:4] = dataC[0:1]
+        dataTotal[0:1] = dataA[0:1] + dataB[0:1] + dataC[0:1]
+
+        return [dataTotal]
+
+    def readaddr(self, i):
         if i < self.num:
             return self.rel['tly2315'][i]['addr']
         else:
@@ -122,8 +157,8 @@ class dev2315():
     def readindex(self, addr):
         for i in range(self.num):
             laddr = self.rel['tly2315'][i]['addr']
-            for j in range (0, 12, 2):
-                if addr[j:j+2] == laddr[j:j + 2] or addr[j:j+2] == 'AA':
+            for j in range(0, 12, 2):
+                if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
                     continue
                 else:
                     break
@@ -141,17 +176,16 @@ if __name__ == '__main__':
     mtr.addmeter(10)
 
     mtr.run(3600)
-    #ac1 = mtr.readins(1)
-    #print(ac1.I)
+    # ac1 = mtr.readins(1)
+    # print(ac1.I)
     mtr.run(3600)
-    #ac1 = mtr.readins(1)
-    #print(ac1.I)
+    # ac1 = mtr.readins(1)
+    # print(ac1.I)
 
     mmtr = dev2315(relation)
     # a = mmtr.readenergy(mtr, 1)
     a = mmtr.readins(mtr, 1)
     print(a)
-
 
     '''
     frame = 'FE FE FE FE 68 02 00 00 00 50 48 68 11 04 33 32 35 33 4c 16'
@@ -169,5 +203,3 @@ if __name__ == '__main__':
         fe = dl645.dl645_makeframe(dt)
         print(fe)
 '''
-
-

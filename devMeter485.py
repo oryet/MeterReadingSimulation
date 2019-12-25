@@ -47,6 +47,10 @@ class meter485():
         eng = self.meter485list[i]['energy'].energy
         return eng
 
+    def readdemand(self, i):
+        demand = self.meter485list[i]['energy'].demand
+        return demand
+
     def readaddr(self, i):
         return self.meter485list[i]['addr']
 
@@ -138,7 +142,7 @@ if __name__ == '__main__':
     mtr.run(3600)
     ins = mtr.readins(1)
     print(ins[0])
-    mtr.run(3600)
+    mtr.run(60)
     ins = mtr.readins(1)
     print(ins[0])
 
@@ -146,7 +150,7 @@ if __name__ == '__main__':
     mtr.createFreezeHisData(defultcfg)
     mondata = mtr.readhismon(1, 3)
 
-    frame = 'FE FE FE FE 68 02 00 00 00 50 48 68 11 04 33 32 35 33 4c 16'
+    frame = 'FE FE FE FE 68 23 01 00 00 15 23 68 11 04 36 33 B3 35 32 16 '
     ret, dt = dl645.dl645_dealframe(frame)
     print(ret, dt)
 
@@ -154,8 +158,8 @@ if __name__ == '__main__':
         index = mtr.readindex(dt['addr'])
         dt['index'] = index
 
-        eng = mtr.readenergy(index)
-        print(eng)
+        # eng = mtr.readenergy(index)
+        # print(eng)
         dl645.dl645_read(dt, mtr, index)
 
         fe = dl645.dl645_makeframe(dt)
