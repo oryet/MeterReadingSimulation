@@ -154,17 +154,17 @@ class dev2315():
         else:
             return self.rel['tly2315'][0]['addr']
 
-    def readindex(self, addr):
-        for i in range(self.num):
-            laddr = self.rel['tly2315'][i]['addr']
-            for j in range(0, 12, 2):
-                if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
-                    continue
-                else:
-                    break
-            if j >= 10:
-                if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
-                    return i
+    def readindex(self, addr, colindex):
+        # for i in range(self.num):
+        laddr = self.rel['tly2315'][colindex]['addr']
+        for j in range(0, 12, 2):
+            if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
+                continue
+            else:
+                break
+        if j >= 10:
+            if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
+                return colindex
         return -1
 
     def getphaseNum(self, i):

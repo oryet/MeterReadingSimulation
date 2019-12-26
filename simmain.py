@@ -55,9 +55,9 @@ def meterrun(mtr, rtc, timeouts, magnification=1):
             mtr.freezeHisData('hour')
 
 
-def meterread(mtr, dt):
+def meterread(mtr, dt, indexlist):
     index = mtr.readindex(dt['addr'])
-    if index >= 0:  # 485表地址存在
+    if index in indexlist:  # 485表地址存在
         dt['index'] = index
         dt['addr'] = mtr.readaddr(index)
         resp.dl645_read(dt, mtr, index)
@@ -67,8 +67,8 @@ def meterread(mtr, dt):
     return None
 
 
-def colread(mmtr, mtr, dt):
-    index = mmtr.readindex(dt['addr'])
+def colread(mmtr, mtr, dt, colindex):
+    index = mmtr.readindex(dt['addr'], colindex)
     if index >= 0:  # col地址存在
         dt['index'] = index
         dt['addr'] = mmtr.readaddr(index)
@@ -81,38 +81,14 @@ def colread(mmtr, mtr, dt):
         return fe
 
 
-if __name__ == '__main__':
-    cfg = {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1,
-           'meterNum': 10, 'looptimes': 10, 'Magnification': 100}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
-
-    relation = {'tly2315': [
-        {'addr': '231500000123', 'meterPhaseA': [1, 2, 3], 'meterPhaseB': [4, 5, 6, 7], 'meterPhaseC': [8, 9, 0]},
-        {'addr': '231500000001', 'meterPhaseA': [1], 'meterPhaseB': [4, 5], 'meterPhaseC': [8]},
-        {'addr': '231500000002', 'meterPhaseA': [2], 'meterPhaseB': [6], 'meterPhaseC': [9]},
-        {'addr': '231500000003', 'meterPhaseA': [3], 'meterPhaseB': [7], 'meterPhaseC': [0]}
-    ]}
-
-    freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
-
-    # 创建时钟
-    rtc = simrtc(cfg['Magnification'])
-
-    # 创建485表
-    mtr = dm.meter485()
-    mtr.addmeter(cfg['meterNum'], 3)
-
-    # 创建485表 历史数据
-    mtr.createFreezeHisData(freezedatacfg)
-
-    # 创建2315
-    mmtr = dc.dev2315(relation)
-
-    # 485表 走字
-    threading.Thread(target=meterrun, args=(mtr, rtc, cfg['looptimes'], cfg['Magnification'])).start()
+def simserialexc(uartcfg, relation):
+    colindex, indexlist = relation2list(uartcfg['port'], relation)
+    if indexlist == None or colindex == None:
+        return
 
     # 创建 模拟表串口
     ss = simSerial()
-    openret, ser = ss.DOpenPort(cfg['port'], cfg['baud'])
+    openret, ser = ss.DOpenPort(uartcfg['port'], uartcfg['baud'])
     while openret:
         dt = {}
         str = ss.DReadPort()  # 读串口数据
@@ -121,10 +97,75 @@ if __name__ == '__main__':
             # 485表尝试解析
             fe = None
             dt['ctime'] = rtc.gettick()
-            fe = meterread(mtr, dt)
+            fe = meterread(mtr, dt, indexlist)
             if fe != None:
                 ss.onSendData(ser, fe, 'hex')
             else:  # 2315尝试解析
-                fe = colread(mmtr, mtr, dt)
+                fe = colread(mmtr, mtr, dt, colindex)
                 if fe != None:
                     ss.onSendData(ser, fe, 'hex')
+
+
+def relation2list(port, relation):
+    for i in range(len(relation['tly2315'])):
+        if port == relation['tly2315'][i]['port']:
+            relation['tly2315'][i]['list'] = relation['tly2315'][i]['meterPhaseA'] + relation['tly2315'][i][
+                'meterPhaseB'] + relation['tly2315'][i]['meterPhaseC']
+            return i, relation['tly2315'][i]['list']
+    return None, None
+
+
+if __name__ == '__main__':
+    cfg2215 = {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2315_1 = {'port': 'COM9', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2315_2 = {'port': 'COM11', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2937_1 = {'port': 'COM13', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2937_2 = {'port': 'COM15', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+
+    mtrcfg = {'meterNum': 18, 'looptimes': 5, 'Magnification': 1}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
+
+    relation = {'tly2315': [
+        {'port': 'COM7', 'addr': '221500000123', 'meterPhaseA': [0, 3, 6, 9, 12, 15],
+         'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
+        {'port': 'COM9', 'addr': '231500000001', 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+         'meterPhaseC': [2, 5, 8]},
+        {'port': 'COM11', 'addr': '231500000002', 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+         'meterPhaseC': [11, 14, 17]},
+        {'port': 'COM13', 'addr': '293700000001', 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+         'meterPhaseC': [2, 5, 8]},
+        {'port': 'COM15', 'addr': '293700000002', 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+         'meterPhaseC': [11, 14, 17]},
+    ]}
+
+    freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
+
+    # 创建时钟
+    rtc = simrtc(mtrcfg['Magnification'])
+
+    # 创建485表
+    mtr = dm.meter485()
+    mtr.addmeter(mtrcfg['meterNum'], 1)
+
+    # 创建485表 历史数据
+    mtr.createFreezeHisData(freezedatacfg)
+
+    # 创建2315
+    mmtr = dc.dev2315(relation)
+
+    # 485表 走字ins = mmtr.readins(index)
+    threading.Thread(target=meterrun, args=(mtr, rtc, mtrcfg['looptimes'], mtrcfg['Magnification'])).start()
+
+    # 创建 2215串口
+    threading.Thread(target=simserialexc, args=(cfg2215, relation)).start()
+
+    # 创建 2315_1串口
+    threading.Thread(target=simserialexc, args=(cfg2315_1, relation)).start()
+
+    # 创建 2315_2串口
+    threading.Thread(target=simserialexc, args=(cfg2315_2, relation)).start()
+
+    # 创建 2937_1串口
+    threading.Thread(target=simserialexc, args=(cfg2937_1, relation)).start()
+
+    # 创建 2937_2
+    threading.Thread(target=simserialexc, args=(cfg2937_2, relation)).start()
