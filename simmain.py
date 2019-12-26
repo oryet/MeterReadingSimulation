@@ -124,16 +124,17 @@ if __name__ == '__main__':
 
     mtrcfg = {'meterNum': 18, 'looptimes': 5, 'Magnification': 1}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
 
+    # CT,电流互感器，英文拼写Current Transformer
     relation = {'tly2315': [
-        {'port': 'COM7', 'addr': '221500000123', 'meterPhaseA': [0, 3, 6, 9, 12, 15],
+        {'port': 'COM7', 'addr': '221500000123', 'CT': 1000, 'meterPhaseA': [0, 3, 6, 9, 12, 15],
          'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
-        {'port': 'COM9', 'addr': '231500000001', 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+        {'port': 'COM9', 'addr': '231500000001', 'CT': 1000, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
          'meterPhaseC': [2, 5, 8]},
-        {'port': 'COM11', 'addr': '231500000002', 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+        {'port': 'COM11', 'addr': '231500000002', 'CT': 1000, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
          'meterPhaseC': [11, 14, 17]},
-        {'port': 'COM13', 'addr': '293700000001', 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+        {'port': 'COM13', 'addr': '293700000001', 'CT': 1000, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
          'meterPhaseC': [2, 5, 8]},
-        {'port': 'COM15', 'addr': '293700000002', 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+        {'port': 'COM15', 'addr': '293700000002', 'CT': 1000, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
          'meterPhaseC': [11, 14, 17]},
     ]}
 

@@ -63,6 +63,9 @@ class dev2315():
         # U
         acTotal[0:1] = (acA[0:1] + acA[0:1] + acA[0:1]) / 3
         # I
+        acA[1] /= self.rel['tly2315'][index]['CT']
+        acB[1] /= self.rel['tly2315'][index]['CT']
+        acC[1] /= self.rel['tly2315'][index]['CT']
         acTotal[1][0] = acA[1][3]
         acTotal[1][1] = acB[1][3]
         acTotal[1][2] = acC[1][3]
@@ -70,6 +73,9 @@ class dev2315():
         # A
         acTotal[2:3] = (acA[2:3] + acA[2:3] + acA[2:3]) / 3
         # P/Q
+        acA[3:5] /= self.rel['tly2315'][index]['CT']
+        acB[3:5] /= self.rel['tly2315'][index]['CT']
+        acC[3:5] /= self.rel['tly2315'][index]['CT']
         acTotal[3][0] = acA[3][3]
         acTotal[3][1] = acB[3][3]
         acTotal[3][2] = acC[3][3]
@@ -108,6 +114,9 @@ class dev2315():
                 eng = mtr.readenergy(i)
                 dataC += np.asarray(eng)
 
+        dataA /= self.rel['tly2315'][index]['CT']
+        dataB /= self.rel['tly2315'][index]['CT']
+        dataC /= self.rel['tly2315'][index]['CT']
         dataTotal[1:2] = dataA[0:1]
         dataTotal[2:3] = dataB[0:1]
         dataTotal[3:4] = dataC[0:1]
@@ -141,6 +150,9 @@ class dev2315():
                 eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
                 dataC += np.asarray(eng)
 
+        dataA /= self.rel['tly2315'][index]['CT']
+        dataB /= self.rel['tly2315'][index]['CT']
+        dataC /= self.rel['tly2315'][index]['CT']
         dataTotal[1:2] = dataA[0:1]
         dataTotal[2:3] = dataB[0:1]
         dataTotal[3:4] = dataC[0:1]
