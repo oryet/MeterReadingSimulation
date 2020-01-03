@@ -99,19 +99,19 @@ def simserialexc(uartcfg, relation):
             dt['ctime'] = rtc.gettick()
             fe = meterread(mtr, dt, indexlist)
             if fe != None:
+                print(datetime.datetime.now(), uartcfg['port'])
                 ss.onSendData(ser, fe, 'hex')
             else:  # 2315尝试解析
                 fe = colread(mmtr, mtr, dt, colindex)
                 if fe != None:
+                    print(datetime.datetime.now(), uartcfg['port'])
                     ss.onSendData(ser, fe, 'hex')
 
 
 def relation2list(port, relation):
     for i in range(len(relation['tly2315'])):
         if port == relation['tly2315'][i]['port']:
-            relation['tly2315'][i]['list'] = relation['tly2315'][i]['meterPhaseA'] + relation['tly2315'][i][
-                'meterPhaseB'] + relation['tly2315'][i]['meterPhaseC']
-            return i, relation['tly2315'][i]['list']
+            return i, relation['tly2315'][i]['topology']
     return None, None
 
 
@@ -126,16 +126,16 @@ if __name__ == '__main__':
 
     # CT,电流互感器，英文拼写Current Transformer
     relation = {'tly2315': [
-        {'port': 'COM7', 'addr': '221500000123', 'CT': 1000, 'meterPhaseA': [0, 3, 6, 9, 12, 15],
-         'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
-        {'port': 'COM9', 'addr': '231500000001', 'CT': 1000, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
-         'meterPhaseC': [2, 5, 8]},
-        {'port': 'COM11', 'addr': '231500000002', 'CT': 1000, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
-         'meterPhaseC': [11, 14, 17]},
-        {'port': 'COM13', 'addr': '293700000001', 'CT': 1000, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
-         'meterPhaseC': [2, 5, 8]},
-        {'port': 'COM15', 'addr': '293700000002', 'CT': 1000, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
-         'meterPhaseC': [11, 14, 17]},
+        {'port': 'COM7', 'addr': '221500000123', 'CT': 5, 'meterPhaseA': [0, 3, 6, 9, 12, 15],
+         'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17], 'topology': []},  # 协议抄读默认为1000，暂不支持更改
+        {'port': 'COM9', 'addr': '231500000001', 'CT': 5, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+         'meterPhaseC': [2, 5, 8], 'topology': [0, 1, 2, 3, 4, 5, 6, 7, 8]},
+        {'port': 'COM11', 'addr': '231500000002', 'CT': 5, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+         'meterPhaseC': [11, 14, 17], 'topology': [9, 10, 11, 12, 13, 14, 15, 16, 17]},
+        {'port': 'COM13', 'addr': '293700000001', 'CT': 5, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
+         'meterPhaseC': [2, 5, 8], 'topology': []},
+        {'port': 'COM15', 'addr': '293700000002', 'CT': 5, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
+         'meterPhaseC': [11, 14, 17], 'topology': []},
     ]}
 
     freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
