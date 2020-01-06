@@ -73,8 +73,6 @@ def colread(mmtr, mtr, dt, colindex):
         dt['index'] = index
         dt['addr'] = mmtr.readaddr(index)
 
-        # eng = mmtr.readenergy(mtr, index)
-        # ins = mmtr.readins(mtr, index)
         resp.dl645_read(dt, mtr, index, mmtr)  # col直接取数据结构
 
         fe = resp.dl645_makeframe(dt)
@@ -95,16 +93,17 @@ def simserialexc(uartcfg, relation):
         ret, dt = resp.dl645_dealframe(str)
         if ret:
             # 485表尝试解析
+            print(datetime.datetime.now(), uartcfg['port'], 'Recv:', str)
             fe = None
             dt['ctime'] = rtc.gettick()
             fe = meterread(mtr, dt, indexlist)
             if fe != None:
-                print(datetime.datetime.now(), uartcfg['port'])
+                print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ',''))
                 ss.onSendData(ser, fe, 'hex')
             else:  # 2315尝试解析
                 fe = colread(mmtr, mtr, dt, colindex)
                 if fe != None:
-                    print(datetime.datetime.now(), uartcfg['port'])
+                    print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ',''))
                     ss.onSendData(ser, fe, 'hex')
 
 
@@ -116,26 +115,29 @@ def relation2list(port, relation):
 
 
 if __name__ == '__main__':
-    cfg2215 = {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2215 =   {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    
     cfg2315_1 = {'port': 'COM9', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
     cfg2315_2 = {'port': 'COM11', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2937_1 = {'port': 'COM13', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2937_2 = {'port': 'COM15', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2315_3 = {'port': 'COM13', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    
+    cfg2937_1 = {'port': 'COM15', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2937_2 = {'port': 'COM17', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    cfg2937_3 = {'port': 'COM19', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
 
-    mtrcfg = {'meterNum': 18, 'looptimes': 5, 'Magnification': 1}  # looptimes: 刷新时间, Magnification: 刷新放大倍数
+    mtrcfg = {'meterNum': 9, 'looptimes': 5, 'Magnification': 1} # looptimes: 刷新时间, Magnification: 刷新放大倍数
 
-    # CT,电流互感器，英文拼写Current Transformer
     relation = {'tly2315': [
-        {'port': 'COM7', 'addr': '221500000123', 'CT': 5, 'meterPhaseA': [0, 3, 6, 9, 12, 15],
-         'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17], 'topology': []},  # 协议抄读默认为1000，暂不支持更改
-        {'port': 'COM9', 'addr': '231500000001', 'CT': 5, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
-         'meterPhaseC': [2, 5, 8], 'topology': [0, 1, 2, 3, 4, 5, 6, 7, 8]},
-        {'port': 'COM11', 'addr': '231500000002', 'CT': 5, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
-         'meterPhaseC': [11, 14, 17], 'topology': [9, 10, 11, 12, 13, 14, 15, 16, 17]},
-        {'port': 'COM13', 'addr': '293700000001', 'CT': 5, 'meterPhaseA': [0, 3, 6], 'meterPhaseB': [1, 4, 7],
-         'meterPhaseC': [2, 5, 8], 'topology': []},
-        {'port': 'COM15', 'addr': '293700000002', 'CT': 5, 'meterPhaseA': [9, 12, 15], 'meterPhaseB': [10, 13, 16],
-         'meterPhaseC': [11, 14, 17], 'topology': []},
+        #{'port': 'COM7',  'addr': '221500000123', 'CT': 5, 'meterPhaseA': [0, 3, 6, 9, 12, 15], 'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
+        {'port': 'COM7',  'addr': '221500000123', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [0,1,2,3,4,5,6,7,8]},
+        
+        {'port': 'COM9',  'addr': '231500000102', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [3,4,5]},
+        {'port': 'COM11',  'addr': '231500000101', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [0,1,2]},
+        {'port': 'COM13',  'addr': '231500000103', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [6,7,8]},
+
+        {'port': 'COM15', 'addr': '293700000205', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': []},
+        {'port': 'COM17', 'addr': '293700000201', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': []},
+        {'port': 'COM19', 'addr': '293700000202', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': []},
     ]}
 
     freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
@@ -165,8 +167,14 @@ if __name__ == '__main__':
     # 创建 2315_2串口
     threading.Thread(target=simserialexc, args=(cfg2315_2, relation)).start()
 
+    # 创建 2315_3串口
+    threading.Thread(target=simserialexc, args=(cfg2315_3, relation)).start()
+
     # 创建 2937_1串口
     threading.Thread(target=simserialexc, args=(cfg2937_1, relation)).start()
 
     # 创建 2937_2
     threading.Thread(target=simserialexc, args=(cfg2937_2, relation)).start()
+
+    # 创建 2937_3
+    threading.Thread(target=simserialexc, args=(cfg2937_3, relation)).start()
