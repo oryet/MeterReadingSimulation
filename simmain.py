@@ -110,7 +110,13 @@ def simserialexc(uartcfg, relation):
 def relation2list(port, relation):
     for i in range(len(relation['tly2315'])):
         if port == relation['tly2315'][i]['port']:
-            return i, relation['tly2315'][i]['topology']
+            colindex = [i]
+            for k in range(len(relation['tly2315'][i]['topologycol'])):
+                for j in range(len(relation['tly2315'])):
+                    if relation['tly2315'][j]['addr'] == relation['tly2315'][i]['topologycol'][k]:
+                        colindex += [j]
+                        break
+            return colindex, relation['tly2315'][i]['topology']
     return None, None
 
 
@@ -129,15 +135,15 @@ if __name__ == '__main__':
 
     relation = {'tly2315': [
         #{'port': 'COM7',  'addr': '221500000123', 'CT': 5, 'meterPhaseA': [0, 3, 6, 9, 12, 15], 'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
-        {'port': 'COM7',  'addr': '221500000123', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [0,1,2,3,4,5,6,7,8]},
+        {'port': 'COM7',  'addr': '221500000123', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [0,1,2,3,4,5,6,7,8], 'topologycol':[]},
         
-        {'port': 'COM9',  'addr': '231500000102', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [3,4,5]},
-        {'port': 'COM11',  'addr': '231500000101', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [0,1,2]},
-        {'port': 'COM13',  'addr': '231500000103', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [6,7,8]},
+        {'port': 'COM9',  'addr': '231500000102', 'CT': 1, 'meterPhaseA': [3,6], 'meterPhaseB': [4,7], 'meterPhaseC': [5,8], 'topology': [3,4,5], 'topologycol': ['293700000202']},
+        {'port': 'COM11',  'addr': '231500000101', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [0,1,2], 'topologycol':[]},
+        {'port': 'COM13',  'addr': '231500000103', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [6,7,8], 'topologycol':[]},
 
-        {'port': 'COM15', 'addr': '293700000205', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': []},
-        {'port': 'COM17', 'addr': '293700000201', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': []},
-        {'port': 'COM19', 'addr': '293700000202', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': []},
+        {'port': 'COM15', 'addr': '293700000205', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [], 'topologycol':[]},
+        {'port': 'COM17', 'addr': '293700000201', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [], 'topologycol':[]},
+        {'port': 'COM19', 'addr': '293700000202', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [], 'topologycol':[]},
     ]}
 
     freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
