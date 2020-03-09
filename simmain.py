@@ -17,6 +17,7 @@ from MeterReadingSimulation import devMeter485 as dm
 import PublicLib.Protocol.dl645resp as resp
 from MeterReadingSimulation import dev2315 as dc
 from PublicLib.ACModule.simRTC import simrtc
+from PublicLib import public as pub
 
 
 def formatdatetime(dt, mon, day, hour):
@@ -98,55 +99,92 @@ def simserialexc(uartcfg, relation):
             dt['ctime'] = rtc.gettick()
             fe = meterread(mtr, dt, indexlist)
             if fe != None:
-                print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ',''))
+                print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ', ''))
                 ss.onSendData(ser, fe, 'hex')
             else:  # 2315尝试解析
                 fe = colread(mmtr, mtr, dt, colindex)
                 if fe != None:
-                    print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ',''))
+                    print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ', ''))
                     ss.onSendData(ser, fe, 'hex')
 
 
 def relation2list(port, relation):
-    for i in range(len(relation['tly2315'])):
-        if port == relation['tly2315'][i]['port']:
+    for i in range(len(relation)):
+        if port == relation[i]['port']:
             colindex = [i]
-            for k in range(len(relation['tly2315'][i]['topologycol'])):
-                for j in range(len(relation['tly2315'])):
-                    if relation['tly2315'][j]['addr'] == relation['tly2315'][i]['topologycol'][k]:
+            for k in range(len(relation[i]['topologycol'])):
+                for j in range(len(relation)):
+                    if relation[j]['addr'] == relation[i]['topologycol'][k]:
                         colindex += [j]
                         break
-            return colindex, relation['tly2315'][i]['topology']
+            return colindex, relation[i]['topology']
     return None, None
 
 
+# 配置文件有效性判断
+def iscfg(cfg):
+    if 'devNum' in cfg and 'uartcfg' in cfg and 'devcfg' in cfg:
+        pass
+    else:
+        return False
+
+    if len(cfg['uartcfg']) == len(cfg['devcfg']) >= cfg['devNum'] > 0:
+        for i in range(cfg['devNum']):
+            uartcfg = cfg['uartcfg'][i]
+            if 'port' in uartcfg and 'baud' in uartcfg and 'parity' in uartcfg and \
+                    'bytesize' in uartcfg and 'stopbits' in uartcfg and 'timeout' in uartcfg:
+                continue
+            else:
+                return False
+
+        for i in range(cfg['devNum']):
+            devcfg = cfg['devcfg'][i]
+            if 'port' in devcfg and 'addr' in devcfg and 'CT' in devcfg and \
+                    'meterPhaseA' in devcfg and 'meterPhaseB' in devcfg and 'meterPhaseC' in devcfg and \
+                    'topology' in devcfg and 'topologycol' in devcfg:
+                continue
+            else:
+                return False
+    else:
+        return False
+
+    if 'mtrcfg' in cfg:
+        mtrcfg = cfg['mtrcfg']
+        if 'meterNum' in mtrcfg and 'looptimes' in mtrcfg and 'Magnification' in mtrcfg:
+            pass
+        else:
+            return False
+
+    if 'freezedatacfg' in cfg:
+        freezedatacfg = cfg['freezedatacfg']
+        if 'day' in freezedatacfg and 'month' in freezedatacfg and 'hour' in freezedatacfg:
+            pass
+        else:
+            return False
+
+    return True
+
+
 if __name__ == '__main__':
-    cfg2215 =   {'port': 'COM7', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    
-    cfg2315_1 = {'port': 'COM9', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2315_2 = {'port': 'COM11', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2315_3 = {'port': 'COM13', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    
-    cfg2937_1 = {'port': 'COM15', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2937_2 = {'port': 'COM17', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
-    cfg2937_3 = {'port': 'COM19', 'baud': '9600', "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}
+    # pub.loggingConfig('logging.conf')
+    simConfig = pub.loadDefaultSettings("cfgsim.json")
+    while not iscfg(simConfig):
+        print('simConfig error')
+        time.sleep(10)
 
-    mtrcfg = {'meterNum': 9, 'looptimes': 5, 'Magnification': 1} # looptimes: 刷新时间, Magnification: 刷新放大倍数
+    # 串口配置参数
+    uartcfg = simConfig['uartcfg']
 
-    relation = {'tly2315': [
-        #{'port': 'COM7',  'addr': '221500000123', 'CT': 5, 'meterPhaseA': [0, 3, 6, 9, 12, 15], 'meterPhaseB': [1, 4, 7, 10, 13, 16], 'meterPhaseC': [2, 5, 8, 11, 14, 17]},
-        {'port': 'COM7',  'addr': '221500000123', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [0,1,2,3,4,5,6,7,8], 'topologycol':[]},
-        
-        {'port': 'COM9',  'addr': '231500000102', 'CT': 1, 'meterPhaseA': [3,6], 'meterPhaseB': [4,7], 'meterPhaseC': [5,8], 'topology': [3,4,5], 'topologycol': ['293700000202']},
-        {'port': 'COM11',  'addr': '231500000101', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [0,1,2], 'topologycol':[]},
-        {'port': 'COM13',  'addr': '231500000103', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [6,7,8], 'topologycol':[]},
+    # 模拟表 表数量及参数配置
+    mtrcfg = simConfig['mtrcfg']
 
-        {'port': 'COM15', 'addr': '293700000205', 'CT': 1, 'meterPhaseA': [0,3,6], 'meterPhaseB': [1,4,7], 'meterPhaseC': [2,5,8], 'topology': [], 'topologycol':[]},
-        {'port': 'COM17', 'addr': '293700000201', 'CT': 1, 'meterPhaseA': [0], 'meterPhaseB': [1], 'meterPhaseC': [2], 'topology': [], 'topologycol':[]},
-        {'port': 'COM19', 'addr': '293700000202', 'CT': 1, 'meterPhaseA': [6], 'meterPhaseB': [7], 'meterPhaseC': [8], 'topology': [], 'topologycol':[]},
-    ]}
+    # A/B/C 索引号为各个相位下通过的电流
+    # topology：端口下支撑的485表
+    # topologycol： 端口下支撑的采集器
+    devcfg = simConfig['devcfg']
 
-    freezedatacfg = {'day': 62, 'month': 12, 'hour': 24}
+    # 冻结参数配置
+    freezedatacfg = simConfig['freezedatacfg']
 
     # 创建时钟
     rtc = simrtc(mtrcfg['Magnification'])
@@ -159,28 +197,12 @@ if __name__ == '__main__':
     mtr.createFreezeHisData(freezedatacfg)
 
     # 创建2315
-    mmtr = dc.dev2315(relation)
+    mmtr = dc.dev2315(devcfg)
 
     # 485表 走字ins = mmtr.readins(index)
     threading.Thread(target=meterrun, args=(mtr, rtc, mtrcfg['looptimes'], mtrcfg['Magnification'])).start()
 
     # 创建 2215串口
-    threading.Thread(target=simserialexc, args=(cfg2215, relation)).start()
-
-    # 创建 2315_1串口
-    threading.Thread(target=simserialexc, args=(cfg2315_1, relation)).start()
-
-    # 创建 2315_2串口
-    threading.Thread(target=simserialexc, args=(cfg2315_2, relation)).start()
-
-    # 创建 2315_3串口
-    threading.Thread(target=simserialexc, args=(cfg2315_3, relation)).start()
-
-    # 创建 2937_1串口
-    threading.Thread(target=simserialexc, args=(cfg2937_1, relation)).start()
-
-    # 创建 2937_2
-    threading.Thread(target=simserialexc, args=(cfg2937_2, relation)).start()
-
-    # 创建 2937_3
-    threading.Thread(target=simserialexc, args=(cfg2937_3, relation)).start()
+    for i in range(simConfig['devNum']):
+        threading.Thread(target=simserialexc, args=(uartcfg[i], devcfg)).start()
+        time.sleep(1)

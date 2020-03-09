@@ -17,7 +17,7 @@ relation = {'tly2315': [
 
 class dev2315():
     def __init__(self, rel):
-        self.num = len(rel['tly2315'])
+        self.num = len(rel)
         # self.dev2315list = []
         self.rel = rel
 
@@ -29,7 +29,7 @@ class dev2315():
 
         # A相
         acA = np.zeros([5, 4], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseA']:
+        for i in self.rel[index]['meterPhaseA']:
             if i < mtr.num:
                 ins = mtr.readins(i)
                 acp = np.asarray(ins)
@@ -40,7 +40,7 @@ class dev2315():
 
         # B相
         acB = np.zeros([5, 4], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseB']:
+        for i in self.rel[index]['meterPhaseB']:
             if i < mtr.num:
                 ins = mtr.readins(i)
                 acp = np.asarray(ins)
@@ -63,9 +63,9 @@ class dev2315():
         # U
         acTotal[0:1] = (acA[0:1] + acA[0:1] + acA[0:1]) / 3
         # I
-        acA[1] /= self.rel['tly2315'][index]['CT']
-        acB[1] /= self.rel['tly2315'][index]['CT']
-        acC[1] /= self.rel['tly2315'][index]['CT']
+        acA[1] /= self.rel[index]['CT']
+        acB[1] /= self.rel[index]['CT']
+        acC[1] /= self.rel[index]['CT']
         acTotal[1][0] = acA[1][3]
         acTotal[1][1] = acB[1][3]
         acTotal[1][2] = acC[1][3]
@@ -73,9 +73,9 @@ class dev2315():
         # A
         acTotal[2:3] = (acA[2:3] + acA[2:3] + acA[2:3]) / 3
         # P/Q
-        acA[3:5] /= self.rel['tly2315'][index]['CT']
-        acB[3:5] /= self.rel['tly2315'][index]['CT']
-        acC[3:5] /= self.rel['tly2315'][index]['CT']
+        acA[3:5] /= self.rel[index]['CT']
+        acB[3:5] /= self.rel[index]['CT']
+        acC[3:5] /= self.rel[index]['CT']
         acTotal[3][0] = acA[3][3]
         acTotal[3][1] = acB[3][3]
         acTotal[3][2] = acC[3][3]
@@ -95,28 +95,28 @@ class dev2315():
 
         # A相
         dataA = np.zeros([4, 6, 9], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseA']:
+        for i in self.rel[index]['meterPhaseA']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
                 dataA += np.asarray(eng)
 
         # B相
         dataB = np.zeros([4, 6, 9], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseB']:
+        for i in self.rel[index]['meterPhaseB']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
                 dataB += np.asarray(eng)
 
         # C相
         dataC = np.zeros([4, 6, 9], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseC']:
+        for i in self.rel[index]['meterPhaseC']:
             if i < mtr.num:
                 eng = mtr.readenergy(i)
                 dataC += np.asarray(eng)
 
-        dataA /= self.rel['tly2315'][index]['CT']
-        dataB /= self.rel['tly2315'][index]['CT']
-        dataC /= self.rel['tly2315'][index]['CT']
+        dataA /= self.rel[index]['CT']
+        dataB /= self.rel[index]['CT']
+        dataC /= self.rel[index]['CT']
         dataTotal[1:2] = dataA[0:1]
         dataTotal[2:3] = dataB[0:1]
         dataTotal[3:4] = dataC[0:1]
@@ -131,28 +131,28 @@ class dev2315():
 
         # A相
         dataA = np.zeros([4, 6], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseA']:
+        for i in self.rel[index]['meterPhaseA']:
             if i < mtr.num:
                 eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
                 dataA += np.asarray(eng)
 
         # B相
         dataB = np.zeros([4, 6], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseB']:
+        for i in self.rel[index]['meterPhaseB']:
             if i < mtr.num:
                 eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
                 dataB += np.asarray(eng)
 
         # C相
         dataC = np.zeros([4, 6], dtype=float)
-        for i in self.rel['tly2315'][index]['meterPhaseC']:
+        for i in self.rel[index]['meterPhaseC']:
             if i < mtr.num:
                 eng = mtr.readdemand(i)[..., 0]  # 取第1列数据
                 dataC += np.asarray(eng)
 
-        dataA /= self.rel['tly2315'][index]['CT']
-        dataB /= self.rel['tly2315'][index]['CT']
-        dataC /= self.rel['tly2315'][index]['CT']
+        dataA /= self.rel[index]['CT']
+        dataB /= self.rel[index]['CT']
+        dataC /= self.rel[index]['CT']
         dataTotal[1:2] = dataA[0:1]
         dataTotal[2:3] = dataB[0:1]
         dataTotal[3:4] = dataC[0:1]
@@ -162,13 +162,13 @@ class dev2315():
 
     def readaddr(self, i):
         if i < self.num:
-            return self.rel['tly2315'][i]['addr']
+            return self.rel[i]['addr']
         else:
-            return self.rel['tly2315'][0]['addr']
+            return self.rel[0]['addr']
 
     def readindex(self, addr, colindex):
         for index in colindex:
-            laddr = self.rel['tly2315'][index]['addr']
+            laddr = self.rel[index]['addr']
             for j in range(0, 12, 2):
                 if addr[j:j + 2] == laddr[j:j + 2] or addr[j:j + 2] == 'AA':
                     continue
