@@ -12,6 +12,7 @@ sys.path.append('../')
 import threading
 import time
 import datetime
+import logging
 from PublicLib.SerialModule.simSerial import simSerial
 from MeterReadingSimulation import devMeter485 as dm
 import PublicLib.Protocol.dl645resp as resp
@@ -81,8 +82,10 @@ def colread(mmtr, mtr, dt, colindex):
 
 
 def simserialexc(uartcfg, relation):
+    logger = logging.getLogger('simserialexc')
     colindex, indexlist = relation2list(uartcfg['port'], relation)
     if indexlist == None or colindex == None:
+        logger.warning('indexlist or colindex is None')
         return
 
     # 创建 模拟表串口
@@ -95,17 +98,19 @@ def simserialexc(uartcfg, relation):
         if ret:
             # 485表尝试解析
             print(datetime.datetime.now(), uartcfg['port'], 'Recv:', str)
+            logger.info(uartcfg['port'] + ' Recv: ' + str)
             fe = None
             dt['ctime'] = rtc.gettick()
             fe = meterread(mtr, dt, indexlist)
             if fe != None:
                 print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ', ''))
+                logger.info(uartcfg['port'] + ' Send: ' + fe.replace(' ', ''))
                 ss.onSendData(ser, fe, 'hex')
             else:  # 2315尝试解析
                 fe = colread(mmtr, mtr, dt, colindex)
                 if fe != None:
                     print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ', ''))
-                    ss.onSendData(ser, fe, 'hex')
+                    logger.info(uartcfg['port'] + ' Send: ' + fe.replace(' ', ''))
 
 
 def relation2list(port, relation):
@@ -166,7 +171,9 @@ def iscfg(cfg):
 
 
 if __name__ == '__main__':
-    # pub.loggingConfig('logging.conf')
+    pub.loggingConfig('logging.conf')
+    logger = logging.getLogger('simmain')
+
     simConfig = pub.loadDefaultSettings("cfgsim.json")
     while not iscfg(simConfig):
         print('simConfig error')
