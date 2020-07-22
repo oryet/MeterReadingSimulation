@@ -1,16 +1,6 @@
-{	"mtrcfg":{"meterNum": 9, "looptimes": 5, "Magnification": 1}, "devNum": 5, "uartcfg":[
-	{"port": "COM7", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1},
-	{"port": "COM9", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1},
-	{"port": "COM11", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1},
-	{"port": "COM13", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1},
-	{"port": "COM15", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1},
-	{"port": "COM17", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}],
+{	"mtrcfg":{"meterNum": 12, "looptimes": 5, "Magnification": 1}, "devNum": 1, "uartcfg":[
+	{"port": "COM9", "baud": "9600", "parity": "Even", "bytesize": 8, "stopbits": 1, "timeout": 1}],
 	"devcfg": [
-        {"port": "COM7", "addr": "221500000123", "CT": 1, "meterPhaseA": [0, 3, 6], "meterPhaseB": [1, 4, 7], "meterPhaseC": [2, 5, 8], "topology": [0, 1, 2, 3, 4, 5, 6, 7, 8], "topologycol": []},
-        {"port": "COM9", "addr": "231500000102", "CT": 1, "meterPhaseA": [3, 6], "meterPhaseB": [4, 7], "meterPhaseC": [5, 8], "topology": [3, 4, 5], "topologycol": []},
-        {"port": "COM11", "addr": "231500000101", "CT": 1, "meterPhaseA": [0], "meterPhaseB": [1], "meterPhaseC": [2], "topology": [0, 1, 2], "topologycol": []},
-        {"port": "COM13", "addr": "231500000103", "CT": 1, "meterPhaseA": [6], "meterPhaseB": [7], "meterPhaseC": [8], "topology": [6, 7, 8], "topologycol": []},
-        {"port": "COM15", "addr": "293700000205", "CT": 1, "meterPhaseA": [0, 3, 6], "meterPhaseB": [1, 4, 7], "meterPhaseC": [2, 5, 8], "topology": [], "topologycol": []},
-		{"port": "COM17", "addr": "293700000201", "CT": 1, "meterPhaseA": [0], "meterPhaseB": [1], "meterPhaseC": [2], "topology": [], "topologycol": []}],
+        {"port": "COM9", "addr": "221500000123", "CT": 1, "meterPhaseA": [0, 3, 6,9], "meterPhaseB": [1, 4,7,10], "meterPhaseC": [2, 5,8,11], "topology": [0, 1, 2, 3, 4, 5, 6,7,8,9,10,11], "topologycol": []}],
 	"freezedatacfg":{"day": 62, "month": 12, "hour": 24}
 }

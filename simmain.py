@@ -111,6 +111,7 @@ def simserialexc(uartcfg, relation):
                 if fe != None:
                     print(datetime.datetime.now(), uartcfg['port'], 'Send:', fe.replace(' ', ''))
                     logger.info(uartcfg['port'] + ' Send: ' + fe.replace(' ', ''))
+                    ss.onSendData(ser, fe, 'hex')
 
 
 def relation2list(port, relation):
@@ -212,4 +213,4 @@ if __name__ == '__main__':
     # 创建 2215串口
     for i in range(simConfig['devNum']):
         threading.Thread(target=simserialexc, args=(uartcfg[i], devcfg)).start()
-        time.sleep(1)
+        time.sleep(0.1)
